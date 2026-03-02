@@ -23,7 +23,7 @@
  * - equals() Method
  * - Data Structure: String
  *
- * @author Developer
+ * @author Akshat
  * @version 3.0
  */
 public class PalindromeCheckerApp_UseCase3 {
