@@ -1,57 +1,55 @@
 /**
  * ================================================
- * MAIN CLASS - UseCase4PalindromeCheckerApp
+ * MAIN CLASS - UseCase5PalindromeCheckerApp
  * ================================================
  *
- * Use Case 4: Character Array Based Validation
+ * Use Case 5: Stack Based Palindrome Checker
  *
  * Description:
- * This class validates a palindrome by converting
- * the string into a character array and comparing
- * characters using the two-pointer technique.
+ * This class validates a palindrome using a Stack
+ * data structure which follows the LIFO principle.
  *
  * At this stage, the application:
- * - Converts string to char array
- * - Uses start and end pointers
- * - Compares characters efficiently
+ * - Pushes characters into a stack
+ * - Pops them in reverse order
+ * - Compares with original sequence
  * - Displays the result
  *
- * This reduces extra memory usage.
- *
  * Key Concepts:
- * - Character Array (char[])
- * - Array Indexing
- * - Two-Pointer Technique
- * - Time Complexity Awareness
- * - Data Structure: char[]
+ * - Stack (LIFO)
+ * - Push Operation
+ * - Pop Operation
+ * - Reversal Logic
+ * - Data Structure: Stack
  *
  * @author Akshat
- * @version 4.0
+ * @version 5.0
  */
+import java.util.Stack;
+
 public class PalindromeCheckerApp {
 
     public static void main(String[] args) {
         // Declare and initialize the input string
-        String input = "radar";
+        String input = "noon";
 
-        // Convert the string into a character array
-        char[] chars = input.toCharArray();
+        // Create a Stack to store characters
+        Stack<Character> stack = new Stack<>();
 
-        // Initialize pointers
-        int start = 0;
-        int end = chars.length - 1;
+        // Push each character of the string into the stack
+        for (char c : input.toCharArray()) {
+            stack.push(c);
+        }
 
         // Assume palindrome initially
         boolean isPalindrome = true;
 
-        // Continue comparison until pointers cross
-        while (start < end) {
-            if (chars[start] != chars[end]) {
+        // Iterate again through original string
+        for (char c : input.toCharArray()) {
+            if (c != stack.pop()) {
                 isPalindrome = false;
                 break;
             }
-            start++;
-            end--;
         }
 
         // Display result
