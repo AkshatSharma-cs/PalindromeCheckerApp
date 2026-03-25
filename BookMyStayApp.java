@@ -2,75 +2,79 @@ import java.util.*;
 
 /**
  * ============================================================
- * CLASS - Reservation
+ * CLASS - InvalidBookingException
  * ============================================================
  *
- * Represents a confirmed booking request.
+ * Use Case 9: Error Handling & Validation
+ *
+ * Description:
+ * Custom exception representing invalid booking scenarios.
+ * Domain-specific exceptions make error handling cleaner.
+ *
+ * @version 9.0
+ */
+class InvalidBookingException extends Exception {
+    public InvalidBookingException(String message) {
+        super(message);
+    }
+}
+
+/**
+ * ============================================================
+ * CLASS - RoomInventory
+ * ============================================================
+ *
+ * Simplified inventory for validation purposes.
  * (Reused from earlier use cases.)
  *
- * @version 8.0
+ * @version 9.0
  */
-class Reservation {
-    private String guestName;
-    private String roomType;
+class RoomInventory {
+    private Map<String, Integer> roomAvailability;
 
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
+    public RoomInventory() {
+        roomAvailability = new HashMap<>();
+        initializeInventory();
     }
 
-    public String getGuestName() { return guestName; }
-    public String getRoomType() { return roomType; }
-}
-
-/**
- * ============================================================
- * CLASS - BookingHistory
- * ============================================================
- *
- * Use Case 8: Booking History & Reporting
- *
- * Description:
- * Maintains a record of confirmed reservations
- * in insertion order for audit and reporting.
- *
- * @version 8.0
- */
-class BookingHistory {
-    private List<Reservation> confirmedReservations;
-
-    public BookingHistory() {
-        confirmedReservations = new ArrayList<>();
+    private void initializeInventory() {
+        roomAvailability.put("Single", 2);
+        roomAvailability.put("Double", 2);
+        roomAvailability.put("Suite", 1);
     }
 
-    public void addReservation(Reservation reservation) {
-        confirmedReservations.add(reservation);
-    }
-
-    public List<Reservation> getConfirmedReservations() {
-        return confirmedReservations;
+    public Map<String, Integer> getRoomAvailability() {
+        return roomAvailability;
     }
 }
 
 /**
  * ============================================================
- * CLASS - BookingReportService
+ * CLASS - ReservationValidator
  * ============================================================
  *
- * Use Case 8: Booking History & Reporting
+ * Use Case 9: Error Handling & Validation
  *
  * Description:
- * Generates reports from booking history data.
- * Reporting logic is separated from storage.
+ * Validates booking requests before processing.
+ * Centralizes validation rules to avoid duplication.
  *
- * @version 8.0
+ * @version 9.0
  */
-class BookingReportService {
-    public void generateReport(BookingHistory history) {
-        System.out.println("Booking History Report\n");
-        for (Reservation r : history.getConfirmedReservations()) {
-            System.out.println("Guest: " + r.getGuestName() +
-                    ", Room Type: " + r.getRoomType());
+class ReservationValidator {
+    public void validate(String guestName, String roomType, RoomInventory inventory)
+            throws InvalidBookingException {
+
+        if (guestName == null || guestName.trim().isEmpty()) {
+            throw new InvalidBookingException("Guest name cannot be empty.");
+        }
+
+        if (!inventory.getRoomAvailability().containsKey(roomType)) {
+            throw new InvalidBookingException("Invalid room type selected.");
+        }
+
+        if (inventory.getRoomAvailability().get(roomType) <= 0) {
+            throw new InvalidBookingException("No " + roomType + " rooms available.");
         }
     }
 }
@@ -80,28 +84,42 @@ class BookingReportService {
  * MAIN CLASS - BookMyStayApp
  * ============================================================
  *
- * Use Case 8: Booking History & Reporting
+ * Use Case 9: Error Handling & Validation
  *
  * Description:
- * Demonstrates how confirmed bookings are stored
- * and reported, maintaining an ordered audit trail.
+ * Demonstrates how user input is validated before booking.
+ * The system accepts input, validates it, and handles errors gracefully.
  *
- * @version 8.0
+ * @version 9.0
  */
 public class BookMyStayApp {
     public static void main(String[] args) {
-        System.out.println("Booking History and Reporting\n");
+        System.out.println("Booking Validation\n");
 
-        // Initialize booking history
-        BookingHistory history = new BookingHistory();
+        Scanner scanner = new Scanner(System.in);
+        RoomInventory inventory = new RoomInventory();
+        ReservationValidator validator = new ReservationValidator();
 
-        // Add confirmed reservations (simulated)
-        history.addReservation(new Reservation("Abhi", "Single"));
-        history.addReservation(new Reservation("Subha", "Double"));
-        history.addReservation(new Reservation("Yamathi", "Suite"));
+        try {
+            // Accept user input
+            System.out.print("Enter guest name: ");
+            String guestName = scanner.nextLine();
 
-        // Generate report
-        BookingReportService reportService = new BookingReportService();
-        reportService.generateReport(history);
+            System.out.print("Enter room type (Single/Double/Suite): ");
+            String roomType = scanner.nextLine();
+
+            // Validate input
+            validator.validate(guestName, roomType, inventory);
+
+            // If validation passes
+            System.out.println("Booking request accepted for Guest: " +
+                    guestName + ", Room Type: " + roomType);
+
+        } catch (InvalidBookingException e) {
+            // Handle domain-specific validation errors
+            System.out.println("Booking failed: " + e.getMessage());
+        } finally {
+            scanner.close();
+        }
     }
 }
