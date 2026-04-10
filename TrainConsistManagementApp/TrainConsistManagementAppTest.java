@@ -1,64 +1,60 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
-import java.util.*;
-import java.util.stream.Collectors;
 
-public class UseCase13TrainConsistMgmtTest {
+public class UseCase14TrainConsistMgmtTest {
 
-    static class Bogie {
+    static class InvalidCapacityException extends Exception {
+        public InvalidCapacityException(String message) { super(message); }
+    }
+
+    static class PassengerBogie {
         String type;
         int capacity;
-        Bogie(String type, int capacity) {
+        PassengerBogie(String type, int capacity) throws InvalidCapacityException {
+            if (capacity <= 0) throw new InvalidCapacityException("Capacity must be greater than zero");
             this.type = type;
             this.capacity = capacity;
         }
     }
 
-    private List<Bogie> loopFilter(List<Bogie> bogies) {
-        List<Bogie> result = new ArrayList<>();
-        for (Bogie b : bogies) {
-            if (b.capacity > 60) result.add(b);
+    @Test
+    public void testException_ValidCapacityCreation() throws InvalidCapacityException {
+        PassengerBogie b = new PassengerBogie("Sleeper", 72);
+        assertEquals(72, b.capacity);
+    }
+
+    @Test(expected = InvalidCapacityException.class)
+    public void testException_NegativeCapacityThrowsException() throws InvalidCapacityException {
+        new PassengerBogie("AC Chair", -10);
+    }
+
+    @Test(expected = InvalidCapacityException.class)
+    public void testException_ZeroCapacityThrowsException() throws InvalidCapacityException {
+        new PassengerBogie("First Class", 0);
+    }
+
+    @Test
+    public void testException_ExceptionMessageValidation() {
+        try {
+            new PassengerBogie("Sleeper", 0);
+            fail("Expected InvalidCapacityException");
+        } catch (InvalidCapacityException e) {
+            assertEquals("Capacity must be greater than zero", e.getMessage());
         }
-        return result;
-    }
-
-    private List<Bogie> streamFilter(List<Bogie> bogies) {
-        return bogies.stream().filter(b -> b.capacity > 60).collect(Collectors.toList());
     }
 
     @Test
-    public void testLoopFilteringLogic() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72), new Bogie("AC Chair", 56));
-        List<Bogie> result = loopFilter(bogies);
-        assertEquals(1, result.size());
+    public void testException_ObjectIntegrityAfterCreation() throws InvalidCapacityException {
+        PassengerBogie b = new PassengerBogie("Sleeper", 50);
+        assertEquals("Sleeper", b.type);
+        assertEquals(50, b.capacity);
     }
 
     @Test
-    public void testStreamFilteringLogic() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72), new Bogie("AC Chair", 56));
-        List<Bogie> result = streamFilter(bogies);
-        assertEquals(1, result.size());
-    }
-
-    @Test
-    public void testLoopAndStreamResultsMatch() {
-        List<Bogie> bogies = Arrays.asList(new Bogie("Sleeper", 72), new Bogie("AC Chair", 56));
-        assertEquals(loopFilter(bogies).size(), streamFilter(bogies).size());
-    }
-
-    @Test
-    public void testExecutionTimeMeasurement() {
-        long start = System.nanoTime();
-        long end = System.nanoTime();
-        assertTrue((end - start) >= 0);
-    }
-
-    @Test
-    public void testLargeDatasetProcessing() {
-        List<Bogie> bogies = new ArrayList<>();
-        for (int i = 0; i < 10000; i++) {
-            bogies.add(new Bogie("Sleeper", 50 + (i % 100)));
-        }
-        assertEquals(loopFilter(bogies).size(), streamFilter(bogies).size());
+    public void testException_MultipleValidBogiesCreation() throws InvalidCapacityException {
+        PassengerBogie b1 = new PassengerBogie("Sleeper", 72);
+        PassengerBogie b2 = new PassengerBogie("AC Chair", 56);
+        assertEquals(72, b1.capacity);
+        assertEquals(56, b2.capacity);
     }
 }
