@@ -1,33 +1,34 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * ================================================================
  * MAIN CLASS - TrainConsistManagementApp
  * ================================================================
  *
- * Use Case 7: Sort Bogies by Capacity (Comparator)
+ * Use Case 9: Group Bogies by Type
  *
  * Description:
- * This class sorts passenger bogies based on seating
- * capacity using a custom Comparator.
+ * This class groups similar bogies together using
+ * Java Stream Collectors.groupingBy().
  *
  * At this stage, the application:
- * - Creates bogie objects
- * - Stores them in a list
- * - Displays unsorted data
- * - Sorts using Comparator logic
- * - Displays sorted result
+ * - Creates a List of bogies
+ * - Streams the List
+ * - Groups bogies by name
+ * - Stores grouped data in a Map
+ * - Displays grouped structure
  *
- * This maps custom ordering using Comparator.
+ * This maps classification logic using groupingBy.
  *
  * @author Akshat
- * @version 7.0
+ * @version 9.0
  */
 public class TrainConsistManagementApp {
 
-    // Inner Bogie class to model passenger bogies
+    // Reusing Bogie model from UC7/UC8
     static class Bogie {
         String name;
         int capacity;
@@ -45,32 +46,36 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
-        System.out.println("===========================================");
-        System.out.println(" UC7 - Sort Bogies by Capacity (Comparator) ");
-        System.out.println("===========================================\n");
+        System.out.println("=============================================");
+        System.out.println(" UC9 - Group Bogies by Type ");
+        System.out.println("=============================================\n");
 
-        // Create List of passenger bogies
+        // Create list of bogies
         List<Bogie> bogies = new ArrayList<>();
         bogies.add(new Bogie("Sleeper", 72));
         bogies.add(new Bogie("AC Chair", 56));
         bogies.add(new Bogie("First Class", 24));
-        bogies.add(new Bogie("General", 90));
+        bogies.add(new Bogie("Sleeper", 70));
+        bogies.add(new Bogie("AC Chair", 60));
 
-        // Display before sorting
-        System.out.println("Before Sorting:");
-        for (Bogie b : bogies) {
-            System.out.println(b);
+        // Display input bogies
+        System.out.println("All Bogies:");
+        bogies.forEach(System.out::println);
+
+        // ---- GROUP USING COLLECTORS.GROUPINGBY ----
+        Map<String, List<Bogie>> groupedBogies =
+                bogies.stream()
+                        .collect(Collectors.groupingBy(b -> b.name));
+
+        // Display grouped structure
+        System.out.println("\nGrouped Bogies:");
+        for (Map.Entry<String, List<Bogie>> entry : groupedBogies.entrySet()) {
+            System.out.println("\nBogie Type: " + entry.getKey());
+            for (Bogie b : entry.getValue()) {
+                System.out.println("Capacity -> " + b.capacity);
+            }
         }
 
-        // Sort using Comparator (by capacity)
-        bogies.sort(Comparator.comparingInt(b -> b.capacity));
-
-        // Display after sorting
-        System.out.println("\nAfter Sorting by Capacity:");
-        for (Bogie b : bogies) {
-            System.out.println(b);
-        }
-
-        System.out.println("\nUC7 sorting completed...");
+        System.out.println("\nUC9 grouping completed...");
     }
 }
